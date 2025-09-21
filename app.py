@@ -11,6 +11,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from src.processors.biopotentials import process_biopotentials
 from src.processors.echo import process_echo
 from src.processors.ct import process_ct
+from src.processors.vmg import process_vmg
 
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
@@ -45,6 +46,8 @@ if uploaded is not None:
             result = process_echo(tmp_path)
         elif modality == "CT":
             result = process_ct(tmp_path)
+        elif modality == "VMG":
+            result = process_vmg(tmp_path)
         else:
             # Placeholder for other modalities
             result = {

@@ -188,7 +188,8 @@ def process_echo_data(file_path: str, weights_path: str, config: dict) -> Dict[s
         summary = f"""Echo Data Analysis:
 - Dataset shape: {n_samples} samples × {n_features} features
 - Numeric features: {len(numeric_cols)}
-- Neural network weights available for advanced processing
+- Neural networitclo ne
+git clone https://github.com/echonet/echonet-lvh.gitk weights available for advanced processing
 - Basic statistical analysis performed"""
         
         metadata = {
