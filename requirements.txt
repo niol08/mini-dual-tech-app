@@ -8,3 +8,12 @@ pydicom
 mne
 nibabel
 soundfile
+google-generativeai
+scikit-learn
+Pillow
+opencv-python
+torch
+transformers
+tensorflow
+openpyxl
+xlrd
