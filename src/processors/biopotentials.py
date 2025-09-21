@@ -42,12 +42,24 @@ def process_biopotentials(file_path: str) -> Dict[str, Any]:
                 "audio": None
             }
         
-        # Load models
-        with open(classifier_path, 'rb') as f:
-            classifier = pickle.load(f)
+        # Load models with error handling
+        classifier = None
+        scaler = None
+        models_loaded = True
+        
+        try:
+            with open(classifier_path, 'rb') as f:
+                classifier = pickle.load(f)
+        except Exception as e:
+            models_loaded = False
+            classifier_error = str(e)
             
-        with open(scaler_path, 'rb') as f:
-            scaler = pickle.load(f)
+        try:
+            with open(scaler_path, 'rb') as f:
+                scaler = pickle.load(f)
+        except Exception as e:
+            models_loaded = False
+            scaler_error = str(e)
         
         # Try to read the data file
         if file_path.lower().endswith('.csv'):
@@ -84,7 +96,7 @@ def process_biopotentials(file_path: str) -> Dict[str, Any]:
         axes[0].grid(True)
         
         # Simple feature extraction for classification
-        if isinstance(data, pd.DataFrame) and data.shape[1] >= scaler.n_features_in_:
+        if models_loaded and isinstance(data, pd.DataFrame) and scaler and data.shape[1] >= scaler.n_features_in_:
             # Use first n features that match scaler expectation
             features = data.iloc[:100, :scaler.n_features_in_].values  # First 100 samples
             
@@ -123,20 +135,45 @@ def process_biopotentials(file_path: str) -> Dict[str, Any]:
             }
             
         else:
-            axes[1].text(0.5, 0.5, 'Insufficient features for classification', 
-                        ha='center', va='center', transform=axes[1].transAxes)
-            axes[1].set_title('Classification Not Available')
+            # Show basic signal analysis without classification
+            axes[1].text(0.5, 0.7, 'Basic Signal Analysis', 
+                        ha='center', va='center', transform=axes[1].transAxes, fontsize=14, fontweight='bold')
             
-            summary = f"""Biopotential Data Loaded:
+            if not models_loaded:
+                error_msg = "Models could not be loaded (pickle file errors)"
+                axes[1].text(0.5, 0.5, error_msg, 
+                            ha='center', va='center', transform=axes[1].transAxes, fontsize=10, color='red')
+                
+            # Show basic statistics
+            if isinstance(data, pd.DataFrame) and len(data.select_dtypes(include=[np.number]).columns) > 0:
+                numeric_cols = data.select_dtypes(include=[np.number]).columns
+                mean_val = data[numeric_cols[0]].mean()
+                std_val = data[numeric_cols[0]].std()
+                axes[1].text(0.5, 0.3, f'Mean: {mean_val:.3f}, Std: {std_val:.3f}', 
+                            ha='center', va='center', transform=axes[1].transAxes, fontsize=10)
+            
+            axes[1].set_title('Analysis Results')
+            
+            error_details = []
+            if not models_loaded:
+                if 'classifier_error' in locals():
+                    error_details.append(f"Classifier error: {classifier_error}")
+                if 'scaler_error' in locals():
+                    error_details.append(f"Scaler error: {scaler_error}")
+            
+            summary = f"""Biopotential Data Analysis:
 - Samples: {n_samples}
 - Features: {n_features}
-- Note: Insufficient features for AP/RP classification (need {scaler.n_features_in_} features)"""
+- Model Status: {'Loaded' if models_loaded else 'Failed to load'}
+- Analysis: Basic signal processing only
+{chr(10).join(['- ' + error for error in error_details]) if error_details else ''}"""
 
             metadata = {
                 "file_type": "biopotential",
                 "samples": int(n_samples),
                 "features": int(n_features),
-                "status": "insufficient_features_for_classification"
+                "models_loaded": models_loaded,
+                "errors": error_details if not models_loaded else []
             }
         
         plt.tight_layout()
