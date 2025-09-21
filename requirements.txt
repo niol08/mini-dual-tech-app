@@ -1,0 +1,10 @@
+streamlit
+numpy
+pandas
+scipy
+matplotlib
+python-dotenv
+pydicom
+mne
+nibabel
+soundfile
