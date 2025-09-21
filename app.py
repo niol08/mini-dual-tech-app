@@ -3,6 +3,14 @@ import tempfile
 import streamlit as st
 import google.generativeai as genai
 from dotenv import load_dotenv
+import sys
+
+# Add src directory to path for imports
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+
+from src.processors.biopotentials import process_biopotentials
+from src.processors.echo import process_echo
+from src.processors.ct import process_ct
 
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
@@ -29,13 +37,38 @@ if uploaded is not None:
 
     st.success(f"Saved upload to temporary file: {tmp_path}")
 
-    result = {
-        "summary": f"[Placeholder] No processor implemented for {modality} yet.",
-        "metadata": {"file": uploaded.name},
-        "images": [],
-        "figures": [],
-        "audio": None,
-    }
+    # Process based on selected modality
+    try:
+        if modality == "BioPotentials":
+            result = process_biopotentials(tmp_path)
+        elif modality == "ECHO":
+            result = process_echo(tmp_path)
+        elif modality == "CT":
+            result = process_ct(tmp_path)
+        else:
+            # Placeholder for other modalities
+            result = {
+                "summary": f"[Placeholder] No processor implemented for {modality} yet.",
+                "metadata": {"file": uploaded.name},
+                "images": [],
+                "figures": [],
+                "audio": None,
+            }
+    except Exception as e:
+        result = {
+            "summary": f"Error processing {modality} file: {str(e)}",
+            "metadata": {"error": str(e), "file": uploaded.name},
+            "images": [],
+            "figures": [],
+            "audio": None,
+        }
+        st.error(f"Processing error: {str(e)}")
+
+    # Clean up temporary file
+    try:
+        os.unlink(tmp_path)
+    except:
+        pass
 
     st.subheader("Processing summary")
     st.markdown(result.get("summary", "No summary produced."))
