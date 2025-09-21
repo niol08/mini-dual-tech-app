@@ -11,3 +11,7 @@ scikit-learn
 Pillow
 openpyxl
 xlrd
+tensorflow
+transformers
+torch
+opencv-python
