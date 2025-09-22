@@ -9,9 +9,9 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from src.processors.ct import process_ct
-from src.processors.erp import process_erp
-from src.processors.ecg import process_ecg
-from src.processors.emg import process_emg
+from src.processors.biopotential import process_biopotential
+from src.processors.echo import process_echo
+from src.processors.vmg import process_vmg
 
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
@@ -41,11 +41,11 @@ if uploaded is not None:
     # Process based on selected modality
     try:
         if modality == "BioPotentials":
-            result = process_erp(tmp_path)  # ERP uses the direct ERP processor
+            result = process_biopotential(tmp_path)  # BioPotentials uses the direct ERP processor
         elif modality == "ECHO":
-            result = process_ecg(tmp_path)  # ECG uses HuggingFace model loader
+            result = process_echo(tmp_path)  # ECHO uses HuggingFace model loader
         elif modality == "VMG":
-            result = process_emg(tmp_path)  # EMG uses HuggingFace model loader
+            result = process_vmg(tmp_path)  # VMG uses HuggingFace model loader
         elif modality == "CT":
             result = process_ct(tmp_path)
         else:
