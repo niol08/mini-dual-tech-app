@@ -10,7 +10,7 @@ import numpy as np
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'app'))
 
-from app.model_loader import HuggingFaceSpaceClient
+from src.app.model_loader import HuggingFaceSpaceClient
 
 def process_ecg(file_path: str) -> Dict[str, Any]:
     """
