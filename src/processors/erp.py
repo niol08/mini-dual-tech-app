@@ -7,6 +7,19 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from utils.erp_hf_model import run_erp_detector
 
+# Import label mapping
+try:
+    from label_map import apply_label_mapping
+except ImportError:
+    def apply_label_mapping(classification, confidence, processor_type='erp'):
+        return {
+            'mapped_label': classification, 
+            'confidence': confidence,
+            'original_label': classification,
+            'mapping_applied': False,
+            'processor_type': processor_type
+        }
+
 def get_ap_rp_status(epilepsy_prob):
     """Determine AP/RP status based on epilepsy probability"""
     if epilepsy_prob >= 0.7:
@@ -69,10 +82,14 @@ def process_erp(file_path: str) -> Dict[str, Any]:
         epilepsy_prob = per_sample[0].get("p_epilepsy", 0) if per_sample else 0
         ap_rp_info = get_ap_rp_status(epilepsy_prob)
         
-        # Create comprehensive summary with version identifier
-        summary = f"""ERP Analysis Results (v2024.09.22 - AP/RP Enhanced):
+        # Apply label mapping for consistent labeling
+        mapped_result = apply_label_mapping(prediction, confidence, processor_type='erp')
+        
+        # Create comprehensive summary with version identifier and label mapping
+        summary = f"""ERP Analysis Results (v2024.09.22-LabelMapped):
 - Model Used: {model_name}
-- Classification: {prediction.capitalize()}
+- Original Classification: {prediction.capitalize()}
+- Mapped Classification: {mapped_result['mapped_label']}
 - Confidence Score: {confidence:.3f}
 - {'High confidence' if confidence > 0.7 else 'Moderate confidence' if confidence > 0.5 else 'Low confidence'} in classification
 
@@ -80,6 +97,7 @@ Signal Analysis:
 - File processed successfully using ERP epilepsy classifier
 - Prediction based on converted signal imagery (128x128 RGB)
 - Input file: {os.path.basename(file_path)}
+- Label mapping: {'Applied' if mapped_result['mapping_applied'] else 'Not needed'}
 
 Clinical Interpretation with AP/RP Analysis:
 - {f'Normal EEG/ERP activity detected - no epileptic patterns identified' if prediction == 'normal' else 'Epileptic activity detected - abnormal EEG patterns found'}
@@ -95,13 +113,15 @@ Clinical Interpretation with AP/RP Analysis:
             "file_type": "erp",
             "model_used": model_name,
             "prediction": prediction,
+            "mapped_prediction": mapped_result['mapped_label'],
             "confidence": float(confidence),
             "processing_method": "ERP_epilepsy_classifier_with_image_conversion",
             "n_samples": erp_result.get('n_samples', 1),
             "per_sample_results": per_sample,
             "file_name": os.path.basename(file_path),
             "ap_rp_analysis": ap_rp_info,
-            "version": "v2024.09.22_AP_RP_Enhanced"
+            "label_mapping": mapped_result,
+            "version": "v2024.09.22_LabelMapped_AP_RP_Enhanced"
         }
         
         return {
@@ -109,7 +129,14 @@ Clinical Interpretation with AP/RP Analysis:
             "metadata": metadata,
             "images": [],
             "figures": [],
-            "audio": None
+            "audio": None,
+            "debug_info": {
+                "timestamp": str(__import__('datetime').datetime.now()),
+                "processor_version": "v2024.09.22_LabelMapped_AP_RP_Enhanced",
+                "original_prediction": prediction,
+                "mapped_prediction": mapped_result['mapped_label'],
+                "ap_rp_status": f"AP:{ap_rp_info['ap_status']}, RP:{ap_rp_info['rp_status']}"
+            }
         }
         
     except Exception as e:
