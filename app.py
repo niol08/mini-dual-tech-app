@@ -12,6 +12,8 @@ from src.processors.ct import process_ct
 from src.processors.biopotential import process_biopotential
 from src.processors.echo import process_echo
 from src.processors.vmg import process_vmg
+from src.processors.otolaryngology import process_otolaryngology
+from src.processors.speech import process_speech
 
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
@@ -48,6 +50,10 @@ if uploaded is not None:
             result = process_vmg(tmp_path)  # VMG uses HuggingFace model loader
         elif modality == "CT":
             result = process_ct(tmp_path)
+        elif modality == "Speech":
+            result = process_speech(tmp_path)  # Speech uses wav2vec2 for dysarthria detection
+        elif modality == "Otolaryngology":
+            result = process_otolaryngology(tmp_path)  # Otolaryngology processor
         else:
             # Placeholder for other modalities
             result = {

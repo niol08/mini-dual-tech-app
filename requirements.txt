@@ -20,3 +20,5 @@ huggingface-hub
 keras
 joblib
 gdown
+librosa
+pydub
