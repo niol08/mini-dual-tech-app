@@ -15,3 +15,8 @@ tensorflow
 transformers
 torch
 opencv-python-headless
+mne
+huggingface-hub
+keras
+joblib
+gdown
