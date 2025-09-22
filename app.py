@@ -25,7 +25,7 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 st.set_page_config(page_title="Biosignal & Imaging", layout="wide")
 st.title("Biosignal & Imaging")
 
-MODALITIES = ["BioPotentials", "ECG", "EMG", "CT", "Speech", "Otolaryngology"]
+MODALITIES = ["BioPotentials", "ECHO", "VMG", "CT", "Speech", "Otolaryngology"]
 modality = st.sidebar.selectbox("Select modality", MODALITIES)
 
 uploaded = st.file_uploader(f"Upload {modality} file", type=None)
@@ -42,9 +42,9 @@ if uploaded is not None:
     try:
         if modality == "BioPotentials":
             result = process_erp(tmp_path)  # ERP uses the direct ERP processor
-        elif modality == "ECG":
+        elif modality == "ECHO":
             result = process_ecg(tmp_path)  # ECG uses HuggingFace model loader
-        elif modality == "EMG":
+        elif modality == "VMG":
             result = process_emg(tmp_path)  # EMG uses HuggingFace model loader
         elif modality == "CT":
             result = process_ct(tmp_path)
