@@ -22,3 +22,4 @@ joblib
 gdown
 librosa
 pydub
+ffmpeg-python
