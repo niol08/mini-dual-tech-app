@@ -94,9 +94,7 @@ if uploaded is not None:
         for fig in result["figures"]:
             st.pyplot(fig)
 
-    if result.get("audio"):
-        st.subheader("Audio preview")
-        st.audio(result["audio"])
+    
 
     st.markdown("---")
     if st.button("Get AI Insight"):
