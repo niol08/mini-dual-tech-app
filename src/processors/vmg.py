@@ -32,6 +32,14 @@ def process_vmg(file_path: str) -> Dict[str, Any]:
             # Get prediction from HuggingFace model
             predicted_label, confidence = hf_client.predict_emg(f)
         
+        # Map old model labels to new VMG labels
+        label_mapping = {
+            'healthy': 'normal_vibration',
+            'myopathy': 'abnormal_low', 
+            'neuropathy': 'abnormal_high'
+        }
+        predicted_label = label_mapping.get(predicted_label, predicted_label)
+        
         # Create visualization
         fig, axes = plt.subplots(2, 2, figsize=(12, 10))
         
@@ -54,9 +62,9 @@ def process_vmg(file_path: str) -> Dict[str, Any]:
             if i != predicted_idx:
                 probs[i] = remaining_prob
         
-        colors = ['green' if predicted_label == 'healthy' else 'lightgreen',
-                 'orange' if predicted_label == 'myopathy' else 'lightyellow', 
-                 'red' if predicted_label == 'neuropathy' else 'lightcoral']
+        colors = ['green' if predicted_label == 'normal_vibration' else 'lightgreen',
+                 'orange' if predicted_label == 'abnormal_low' else 'lightyellow', 
+                 'red' if predicted_label == 'abnormal_high' else 'lightcoral']
         
         bars = axes[0, 0].bar([class_names[c] for c in classes], probs, color=colors)
         axes[0, 0].set_title('VMG Classification Probabilities')
@@ -146,8 +154,8 @@ Signal Analysis:
 Clinical Interpretation:
 - VMG Pattern: {class_names[predicted_label]} detected
 - Vibration Analysis: {f'High confidence result - {confidence:.1%} certainty' if confidence > 0.8 else 'Moderate confidence - clinical correlation advised'}
-- Motor Unit Assessment: {'Normal motor unit recruitment patterns' if predicted_label == 'healthy' else 'Abnormal motor unit patterns detected'}
-- {'No immediate action needed' if predicted_label == 'healthy' else 'Further neurological evaluation recommended'}
+- Motor Unit Assessment: {'Normal motor unit recruitment patterns' if predicted_label == 'normal_vibration' else 'Abnormal motor unit patterns detected'}
+- {'No immediate action needed' if predicted_label == 'normal_vibration' else 'Further neurological evaluation recommended'}
 
 VMG vs EMG Correlation:
 - VMG measures: Mechanical muscle vibrations (5-100 Hz)
