@@ -39,12 +39,14 @@ def process_erp(file_path: str) -> Dict[str, Any]:
         per_sample = erp_result.get('per_sample', [{}])
         
         # Create comprehensive summary
-        summary = f"""ERP Analysis Results:
+        summary = f"""Biopotential Analysis Results:
+- Model Used: {model_name}
 - Classification: {prediction.capitalize()}
 - Confidence Score: {confidence:.3f}
 - {'High confidence' if confidence > 0.7 else 'Moderate confidence' if confidence > 0.5 else 'Low confidence'} in classification
 
 Signal Analysis:
+- File processed successfully using ERP epilepsy classifier
 - Prediction based on converted signal imagery (128x128 RGB)
 - Input file: {os.path.basename(file_path)}
 
