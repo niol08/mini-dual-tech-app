@@ -14,10 +14,11 @@ from src.app.model_loader import HuggingFaceSpaceClient
 
 def process_emg(file_path: str) -> Dict[str, Any]:
     """
-    Process EMG data using the HuggingFace model loader.
+    Process VMG (Vibromyogram) data using the HuggingFace model loader.
+    VMG measures mechanical muscle vibrations during contraction.
     
     Args:
-        file_path: Path to the EMG data file
+        file_path: Path to the VMG data file
         
     Returns:
         Dictionary containing processing results compatible with app.py structure
@@ -34,12 +35,12 @@ def process_emg(file_path: str) -> Dict[str, Any]:
         # Create visualization
         fig, axes = plt.subplots(2, 2, figsize=(12, 10))
         
-        # EMG Classification Results
+        # VMG Classification Results
         classes = ["healthy", "myopathy", "neuropathy"]
         class_names = {
-            "healthy": "Healthy Muscle",
-            "myopathy": "Myopathy (Muscle Disease)",
-            "neuropathy": "Neuropathy (Nerve Disease)"
+            "healthy": "Normal VMG Pattern",
+            "myopathy": "Myopathy (Muscle Fiber Disease)",
+            "neuropathy": "Neuropathy (Motor Unit Disease)"
         }
         
         # Create probability bars (estimated based on predicted class)
@@ -58,7 +59,7 @@ def process_emg(file_path: str) -> Dict[str, Any]:
                  'red' if predicted_label == 'neuropathy' else 'lightcoral']
         
         bars = axes[0, 0].bar([class_names[c] for c in classes], probs, color=colors)
-        axes[0, 0].set_title('EMG Classification Probabilities')
+        axes[0, 0].set_title('VMG Classification Probabilities')
         axes[0, 0].set_ylabel('Probability')
         axes[0, 0].set_ylim(0, 1)
         axes[0, 0].tick_params(axis='x', rotation=45)
@@ -70,50 +71,54 @@ def process_emg(file_path: str) -> Dict[str, Any]:
                            f'{prob:.3f}', ha='center', va='bottom', fontsize=8)
         
         # Results summary
-        result_text = f"""EMG Analysis Results:
+        result_text = f"""VMG Analysis Results:
 Predicted Class: {predicted_label.capitalize()}
 Classification: {class_names[predicted_label]}
 Confidence: {confidence:.3f}
-Model: HuggingFace EMG Classifier
-Data Points: 1000 normalized samples"""
+Model: HuggingFace VMG/EMG Classifier
+Data Points: 1000 normalized vibration samples"""
         
         axes[0, 1].text(0.1, 0.5, result_text, 
                        transform=axes[0, 1].transAxes, fontsize=10, verticalalignment='center',
                        bbox=dict(boxstyle="round,pad=0.3", facecolor="lightblue"))
-        axes[0, 1].set_title('EMG Analysis Summary')
+        axes[0, 1].set_title('VMG Analysis Summary')
         axes[0, 1].axis('off')
         
-        # EMG Quality Metrics (estimated)
-        quality_factors = ['Signal Quality', 'Muscle Activation', 'Noise Level', 'Data Completeness']
+        # VMG Quality Metrics (estimated)
+        quality_factors = ['Vibration Signal Quality', 'Motor Unit Activity', 'Noise Level', 'Data Completeness']
         quality_scores = [confidence, confidence * 0.9, 1 - confidence * 0.4, 0.95]
         
         axes[1, 0].barh(quality_factors, quality_scores, 
                        color=['green', 'blue', 'orange', 'purple'])
-        axes[1, 0].set_title('EMG Signal Quality Assessment')
+        axes[1, 0].set_title('VMG Signal Quality Assessment')
         axes[1, 0].set_xlim(0, 1)
         axes[1, 0].set_xlabel('Quality Score')
         
-        # Clinical Significance and Recommendations
+        # Clinical Significance and Recommendations for VMG
         clinical_recommendations = {
-            "healthy": """Normal muscle function detected.
+            "healthy": """Normal muscle vibration patterns detected.
 - Continue regular physical activity
-- Routine monitoring as needed
-- No immediate intervention required""",
-            "myopathy": """Myopathy (muscle disease) detected.
+- Routine VMG monitoring as needed
+- No immediate intervention required
+- Consider for baseline reference""",
+            "myopathy": """Myopathy (muscle fiber disease) detected via VMG.
 - Consult neurologist or muscle specialist
-- Consider muscle biopsy if indicated
-- Monitor progression with serial EMG
-- Physical therapy may be beneficial""",
-            "neuropathy": """Neuropathy (nerve disease) detected.
+- Consider muscle biopsy if clinically indicated
+- Monitor progression with serial VMG assessments
+- Physical therapy and strength training may help
+- Correlate with EMG findings""",
+            "neuropathy": """Neuropathy (motor unit disease) detected via VMG.
 - Neurological evaluation recommended
-- Consider nerve conduction studies
-- Address underlying causes (diabetes, etc.)
-- Neuroprotective measures advised"""
+- Consider nerve conduction velocity studies
+- Address underlying causes (diabetes, toxins, etc.)
+- Neuroprotective measures advised
+- Monitor with combined VMG/EMG studies"""
         }
         
         clinical_text = f"""Clinical Interpretation:
-Classification: {class_names[predicted_label]}
+VMG Classification: {class_names[predicted_label]}
 Confidence: {'High' if confidence > 0.8 else 'Moderate' if confidence > 0.6 else 'Low'}
+Signal Type: Mechanical muscle vibrations
 
 Recommendations:
 {clinical_recommendations.get(predicted_label, 'Consult healthcare provider')}"""
@@ -126,9 +131,10 @@ Recommendations:
         
         plt.tight_layout()
         
-        # Create comprehensive summary
-        summary = f"""EMG Analysis Results:
-- Model Used: HuggingFace EMG Classifier (1000-point normalized EMG signals)
+        # Create comprehensive VMG summary
+        summary = f"""VMG (Vibromyogram) Analysis Results:
+- Model Used: HuggingFace EMG/VMG Classifier (adapted for muscle vibrations)
+- Signal Type: Mechanical muscle vibrations during contraction
 - Classification: {class_names[predicted_label]}
 - Predicted Class: {predicted_label.capitalize()}
 - Confidence Score: {confidence:.3f}
@@ -137,29 +143,39 @@ Recommendations:
 Signal Analysis:
 - Input: 1000 data points processed and normalized
 - Model: Deep learning classifier for neuromuscular disorders
-- Processing: Z-score normalization applied
+- Processing: Z-score normalization applied to vibration data
+- Signal type: VMG (mechanical) vs EMG (electrical) activity
 
 Clinical Interpretation:
-- {class_names[predicted_label]} detected
-- {f'High confidence result - {confidence:.1%} certainty' if confidence > 0.8 else 'Moderate confidence - clinical correlation advised'}
+- VMG Pattern: {class_names[predicted_label]} detected
+- Vibration Analysis: {f'High confidence result - {confidence:.1%} certainty' if confidence > 0.8 else 'Moderate confidence - clinical correlation advised'}
+- Motor Unit Assessment: {'Normal motor unit recruitment patterns' if predicted_label == 'healthy' else 'Abnormal motor unit patterns detected'}
 - {'No immediate action needed' if predicted_label == 'healthy' else 'Further neurological evaluation recommended'}
+
+VMG vs EMG Correlation:
+- VMG measures: Mechanical muscle vibrations (5-100 Hz)
+- Clinical significance: Complements EMG electrical activity analysis
+- Recommended: Consider EMG correlation for comprehensive assessment
 
 File: {os.path.basename(file_path)}"""
         
         # Build metadata
         metadata = {
-            "file_type": "emg",
-            "model_used": "HuggingFace_EMG_Classifier",
+            "file_type": "vmg",
+            "signal_type": "mechanical_muscle_vibrations",
+            "model_used": "HuggingFace_EMG_VMG_Classifier",
             "prediction": predicted_label,
             "human_readable": class_names[predicted_label],
             "confidence": float(confidence),
-            "processing_method": "deep_learning_1000_point_normalized_classification",
+            "processing_method": "deep_learning_1000_point_normalized_vmg_classification",
             "file_name": os.path.basename(file_path),
-            "emg_classes": classes,
+            "vmg_classes": classes,
             "clinical_recommendations": clinical_recommendations.get(predicted_label, "Consult healthcare provider"),
             "data_points": 1000,
             "model_source": "huggingface_hub",
-            "normalization": "z_score_applied"
+            "normalization": "z_score_applied",
+            "frequency_range": "5-100_Hz_typical_vmg",
+            "signal_characteristics": "mechanical_vibrations_during_muscle_contraction"
         }
         
         return {
@@ -171,31 +187,33 @@ File: {os.path.basename(file_path)}"""
         }
         
     except Exception as e:
-        # Error handling
-        error_summary = f"""EMG Processing Error:
+        # Error handling for VMG
+        error_summary = f"""VMG Processing Error:
 - Error: {str(e)}
 - File: {os.path.basename(file_path)}
-- Processing failed during EMG analysis
+- Processing failed during VMG analysis
 
 Possible causes:
 - Model download failed
-- Unsupported file format
-- Invalid EMG data format
+- Unsupported file format for VMG data
+- Invalid VMG signal data format
 - Missing dependencies (tensorflow, keras)
 - Network connectivity issues
 
 Recommended actions:
 - Check internet connection for model download
-- Verify file contains numeric EMG signal data
+- Verify file contains numeric VMG vibration signal data
 - Ensure file format is .txt or .csv
 - File should contain at least 1000 data points
-- Try uploading a different EMG file"""
+- VMG signals typically in 5-100 Hz frequency range
+- Try uploading a different VMG file"""
 
         error_metadata = {
-            "file_type": "emg_error",
+            "file_type": "vmg_error",
+            "signal_type": "mechanical_muscle_vibrations_error",
             "error": str(e),
             "file_path": file_path,
-            "processing_method": "huggingface_model_failed"
+            "processing_method": "huggingface_vmg_model_failed"
         }
         
         return {

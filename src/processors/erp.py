@@ -86,21 +86,18 @@ def process_erp(file_path: str) -> Dict[str, Any]:
         mapped_result = apply_label_mapping(prediction, confidence, processor_type='erp')
         
         # Create comprehensive summary with version identifier and label mapping
-        summary = f"""ERP Analysis Results (v2024.09.22-LabelMapped):
-- Model Used: {model_name}
+        summary = f"""BioPotential Analysis Results :
 - Original Classification: {prediction.capitalize()}
 - Mapped Classification: {mapped_result['mapped_label']}
 - Confidence Score: {confidence:.3f}
 - {'High confidence' if confidence > 0.7 else 'Moderate confidence' if confidence > 0.5 else 'Low confidence'} in classification
 
 Signal Analysis:
-- File processed successfully using ERP epilepsy classifier
 - Prediction based on converted signal imagery (128x128 RGB)
 - Input file: {os.path.basename(file_path)}
 - Label mapping: {'Applied' if mapped_result['mapping_applied'] else 'Not needed'}
 
 Clinical Interpretation with AP/RP Analysis:
-- {f'Normal EEG/ERP activity detected - no epileptic patterns identified' if prediction == 'normal' else 'Epileptic activity detected - abnormal EEG patterns found'}
 - Action Potential (AP) Status: {ap_rp_info['ap_status']}
 - Resting Potential (RP) Status: {ap_rp_info['rp_status']}
 - Neurophysiological Assessment: {ap_rp_info['interpretation']}
@@ -110,8 +107,8 @@ Clinical Interpretation with AP/RP Analysis:
         
         # Build metadata
         metadata = {
-            "file_type": "erp",
-            "model_used": model_name,
+            "file_type": "ap/rp",
+
             "prediction": prediction,
             "mapped_prediction": mapped_result['mapped_label'],
             "confidence": float(confidence),
