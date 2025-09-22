@@ -8,10 +8,10 @@ import sys
 # Add src directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-from src.processors.biopotentials import process_biopotentials
-from src.processors.echo import process_echo
 from src.processors.ct import process_ct
-from src.processors.vmg import process_vmg
+from src.processors.erp import process_erp
+from src.processors.ecg import process_ecg
+from src.processors.emg import process_emg
 
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
@@ -25,7 +25,7 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 st.set_page_config(page_title="Biosignal & Imaging", layout="wide")
 st.title("Biosignal & Imaging")
 
-MODALITIES = ["VMG", "CT", "Speech", "ECHO", "BioPotentials", "Otolaryngology"]
+MODALITIES = ["ERP", "ECG", "EMG", "CT", "Speech", "Otolaryngology"]
 modality = st.sidebar.selectbox("Select modality", MODALITIES)
 
 uploaded = st.file_uploader(f"Upload {modality} file", type=None)
@@ -40,14 +40,14 @@ if uploaded is not None:
 
     # Process based on selected modality
     try:
-        if modality == "BioPotentials":
-            result = process_biopotentials(tmp_path)
-        elif modality == "ECHO":
-            result = process_echo(tmp_path)
+        if modality == "ERP":
+            result = process_erp(tmp_path)  # ERP uses the direct ERP processor
+        elif modality == "ECG":
+            result = process_ecg(tmp_path)  # ECG uses HuggingFace model loader
+        elif modality == "EMG":
+            result = process_emg(tmp_path)  # EMG uses HuggingFace model loader
         elif modality == "CT":
             result = process_ct(tmp_path)
-        elif modality == "VMG":
-            result = process_vmg(tmp_path)
         else:
             # Placeholder for other modalities
             result = {
